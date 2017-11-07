@@ -22,19 +22,14 @@ defmodule Amelia do
   ## Lock helper functions
 
   defp do_lock(lock_name) do
-    Logger.warn "Acquiring lock: #{inspect lock_name}"
     :global.set_lock {lock_name, self()}
-    Logger.warn "Acquired lock: #{inspect lock_name}"
   end
 
   defp do_unlock(lock_name, expected_data, actual_data) do
-    Logger.warn "Unlocking lock: #{inspect lock_name}"
     if expected_data == actual_data do
       :global.del_lock {lock_name, self()}
-      Logger.warn "Unlocked lock: #{inspect lock_name}"
       :ok
     else
-      Logger.warn "Couldn't unlock lock: #{inspect lock_name}"
       :error
     end
   end
@@ -47,7 +42,7 @@ defmodule Amelia do
       do_lock lock_name
     end
 
-    {:noreply, %{new_state | is_locked: true}}
+    {:reply, :ok, %{new_state | is_locked: true}}
   end
 
   def handle_call({:unlock, lock_name}, _from, state) do
@@ -62,8 +57,8 @@ defmodule Amelia do
     end
 
     case did_unlock do
-      true -> {:noreply, %{new_state | is_locked: false}}
-      false -> {:noreply, new_state}
+      true -> {:reply, :ok, %{new_state | is_locked: false}}
+      false -> {:reply, :ok, new_state}
     end
   end
 
@@ -75,7 +70,7 @@ defmodule Amelia do
       Process.send_after self(), {:unlock, lock_name}, time_ms
     end
 
-    {:noreply, %{state | is_locked: true}}
+    {:reply, :ok, %{state | is_locked: true}}
   end
 
   def handle_info({:unlock, lock_name}, state) do
@@ -104,8 +99,8 @@ defmodule Amelia do
     end
 
     case did_lock do
-      true -> {:noreply, %{new_state | is_locked: true, lock_data: data}}
-      false -> {:noreply, %{new_state | is_locked: true}}
+      true -> {:reply, :ok, %{new_state | is_locked: true, lock_data: data}}
+      false -> {:reply, :ok, %{new_state | is_locked: true}}
     end
   end
 
@@ -122,8 +117,8 @@ defmodule Amelia do
       end
 
     case did_unlock do
-      true -> {:noreply, %{new_state | is_locked: false, lock_data: nil}}
-      false -> {:noreply, %{new_state | is_locked: true}}
+      true -> {:reply, :ok, %{new_state | is_locked: false, lock_data: nil}}
+      false -> {:reply, :ok, %{new_state | is_locked: true}}
     end
   end
 
@@ -135,7 +130,7 @@ defmodule Amelia do
       Process.send_after self(), {:timedataunlock, lock_name, data}, time_ms
     end
 
-    {:noreply, %{state | is_locked: true, lock_data: data}}
+    {:reply, :ok, %{state | is_locked: true, lock_data: data}}
   end
 
   def handle_info({:timedataunlock, lock_name, data}, state) do

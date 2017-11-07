@@ -13,9 +13,9 @@ defmodule AmeliaTest do
 
   test "that lock and unlock work", %{process: process} do
     assert GenServer.call(process, :is_locked) == false
-    GenServer.cast process, {:lock, :test}
+    :ok = GenServer.call process, {:lock, :test}
     assert GenServer.call(process, :is_locked) == true
-    GenServer.cast process, {:unlock, :test}
+    :ok = GenServer.call process, {:unlock, :test}
     assert GenServer.call(process, :is_locked) == false
   end
 
@@ -25,18 +25,18 @@ defmodule AmeliaTest do
     assert GenServer.call(process, :is_locked) == false
     :timer.sleep 1000
     assert GenServer.call(process, :is_locked) == false
-    GenServer.cast process, {:lock, :test}
+    :ok = GenServer.call process, {:lock, :test}
     assert GenServer.call(process, :is_locked) == true
     :timer.sleep 1000
     assert GenServer.call(process, :is_locked) == true
-    GenServer.cast process, {:unlock, :test}
+    :ok = GenServer.call process, {:unlock, :test}
     :timer.sleep 1000
     assert GenServer.call(process, :is_locked) == false
   end
 
   test "that timelock works", %{process: process} do
     assert GenServer.call(process, :is_locked) == false
-    GenServer.cast process, {:timelock, :test, 1500}
+    :ok = GenServer.call process, {:timelock, :test, 1500}, 10000
     assert GenServer.call(process, :is_locked) == true
     :timer.sleep 1000
     assert GenServer.call(process, :is_locked) == true
@@ -46,28 +46,28 @@ defmodule AmeliaTest do
 
   test "that datalock works", %{process: process} do
     assert GenServer.call(process, :is_locked) == false
-    GenServer.cast process, {:datalock, :test, :test}
+    :ok = GenServer.call process, {:datalock, :test, :test}
     assert GenServer.call(process, :is_locked) == true
     assert GenServer.call(process, :get_lock_data) == :test
-    GenServer.cast process, {:dataunlock, :test, :test}
+    :ok = GenServer.call process, {:dataunlock, :test, :test}
     assert GenServer.call(process, :is_locked) == false
   end
 
   test "that datalock disallows standard unlock", %{process: process} do
     assert GenServer.call(process, :is_locked) == false
-    GenServer.cast process, {:datalock, :test, :test}
+    :ok = GenServer.call process, {:datalock, :test, :test}
     assert GenServer.call(process, :is_locked) == true
     assert GenServer.call(process, :get_lock_data) == :test
     assert GenServer.call(process, :get_lock_data) != nil
-    GenServer.cast process, {:unlock, :test}
+    :ok = GenServer.call process, {:unlock, :test}
     assert GenServer.call(process, :is_locked) == true
-    GenServer.cast process, {:dataunlock, :test, :test}
+    :ok = GenServer.call process, {:dataunlock, :test, :test}
     assert GenServer.call(process, :is_locked) == false
   end
 
   test "that timedatalock works", %{process: process} do
     assert GenServer.call(process, :is_locked) == false
-    GenServer.cast process, {:timedatalock, :test, 1500, :test}
+    :ok = GenServer.call process, {:timedatalock, :test, 1500, :test}
     assert GenServer.call(process, :is_locked) == true
     assert GenServer.call(process, :get_lock_data) == :test
 
@@ -82,14 +82,14 @@ defmodule AmeliaTest do
 
   test "that timedatalock disallows standard unlock", %{process: process} do
     assert GenServer.call(process, :is_locked) == false
-    GenServer.cast process, {:timedatalock, :test, 15000, :test}
+    :ok = GenServer.call process, {:timedatalock, :test, 15000, :test}
     assert GenServer.call(process, :is_locked) == true
     assert GenServer.call(process, :get_lock_data) == :test
     assert GenServer.call(process, :get_lock_data) != nil
-    GenServer.cast process, {:unlock, :test}
+    :ok = GenServer.call process, {:unlock, :test}
     assert GenServer.call(process, :is_locked) == true
     :timer.sleep 2000
-    GenServer.cast process, {:unlock, :test}
+    :ok = GenServer.call process, {:unlock, :test}
     assert GenServer.call(process, :is_locked) == true
     send process, {:timedataunlock, :test, :test}
     assert GenServer.call(process, :is_locked) == false
