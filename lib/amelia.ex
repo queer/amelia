@@ -22,12 +22,12 @@ defmodule Amelia do
   ## Lock helper functions
 
   defp do_lock(lock_name) do
-    :global.set_lock {lock_name, self()}, [node() | Node.list()]
+    :global.set_lock {lock_name, self()}
   end
 
   defp do_unlock(lock_name, expected_data, actual_data) do
     if expected_data == actual_data do
-      :global.del_lock {lock_name, self()}, [node() | Node.list()]
+      :global.del_lock {lock_name, self()}
       :ok
     else
       :error
