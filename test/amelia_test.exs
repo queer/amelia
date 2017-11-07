@@ -79,4 +79,19 @@ defmodule AmeliaTest do
     assert GenServer.call(process, :is_locked) == false
     assert GenServer.call(process, :get_lock_data) == nil
   end
+
+  test "that timedatalock disallows standard unlock", %{process: process} do
+    assert GenServer.call(process, :is_locked) == false
+    GenServer.cast process, {:timedatalock, :test, 15000, :test}
+    assert GenServer.call(process, :is_locked) == true
+    assert GenServer.call(process, :get_lock_data) == :test
+    assert GenServer.call(process, :get_lock_data) != nil
+    GenServer.cast process, {:unlock, :test}
+    assert GenServer.call(process, :is_locked) == true
+    :timer.sleep 2000
+    GenServer.cast process, {:unlock, :test}
+    assert GenServer.call(process, :is_locked) == true
+    send process, {:timedataunlock, :test, :test}
+    assert GenServer.call(process, :is_locked) == false
+  end
 end
