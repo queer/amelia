@@ -124,7 +124,7 @@ defmodule Amelia do
 
   ## GenServer API: Timed data un/locking
 
-    def handle_cast({:timedatalock, lock_name, time_ms, data}, state) do
+  def handle_cast({:timedatalock, lock_name, time_ms, data}, state) do
     unless state[:is_locked] do
       do_lock lock_name
       Process.send_after self(), {:timedataunlock, lock_name, data}, time_ms
