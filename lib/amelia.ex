@@ -22,14 +22,19 @@ defmodule Amelia do
   ## Lock helper functions
 
   defp do_lock(lock_name) do
+    Logger.warn "Acquiring lock: #{inspect lock_name}"
     :global.set_lock {lock_name, self()}
+    Logger.warn "Acquired lock: #{inspect lock_name}"
   end
 
   defp do_unlock(lock_name, expected_data, actual_data) do
+    Logger.warn "Unlocking lock: #{inspect lock_name}"
     if expected_data == actual_data do
       :global.del_lock {lock_name, self()}
+      Logger.warn "Unlocked lock: #{inspect lock_name}"
       :ok
     else
+      Logger.warn "Couldn't unlock lock: #{inspect lock_name}"
       :error
     end
   end
