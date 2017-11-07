@@ -1,6 +1,6 @@
 # Amelia
 
-Asynchronous distributed timed / data-based locking for Elixir. 
+Distributed timed / data-based locking for Elixir. 
 
 ## Installation
 

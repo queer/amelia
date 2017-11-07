@@ -41,7 +41,7 @@ defmodule Amelia do
 
   ## GenServer API: Basic un/locking
 
-  def handle_cast({:lock, lock_name}, state) do
+  def handle_call({:lock, lock_name}, _from, state) do
     new_state = state
     unless state[:is_locked] do
       do_lock lock_name
@@ -50,7 +50,7 @@ defmodule Amelia do
     {:noreply, %{new_state | is_locked: true}}
   end
 
-  def handle_cast({:unlock, lock_name}, state) do
+  def handle_call({:unlock, lock_name}, _from, state) do
     new_state = state
     did_unlock = if state[:is_locked] do
       case do_unlock(lock_name, nil, state[:lock_data]) do
@@ -69,7 +69,7 @@ defmodule Amelia do
 
   ## GenServer API: Timed un/locking
 
-  def handle_cast({:timelock, lock_name, time_ms}, state) do
+  def handle_call({:timelock, lock_name, time_ms}, _from, state) do
     unless state[:is_locked] do
       do_lock lock_name
       Process.send_after self(), {:unlock, lock_name}, time_ms
@@ -94,7 +94,7 @@ defmodule Amelia do
 
   ## GenServer API: Data un/locking
 
-  def handle_cast({:datalock, lock_name, data}, state) do
+  def handle_call({:datalock, lock_name, data}, _from, state) do
     new_state = state
     did_lock = unless state[:is_locked] do
       do_lock lock_name
@@ -109,7 +109,7 @@ defmodule Amelia do
     end
   end
 
-  def handle_cast({:dataunlock, lock_name, data}, state) do
+  def handle_call({:dataunlock, lock_name, data}, _from, state) do
     new_state = state
     did_unlock = 
       if state[:is_locked] do
@@ -129,7 +129,7 @@ defmodule Amelia do
 
   ## GenServer API: Timed data un/locking
 
-  def handle_cast({:timedatalock, lock_name, time_ms, data}, state) do
+  def handle_call({:timedatalock, lock_name, time_ms, data}, _from, state) do
     unless state[:is_locked] do
       do_lock lock_name
       Process.send_after self(), {:timedataunlock, lock_name, data}, time_ms
